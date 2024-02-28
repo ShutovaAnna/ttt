@@ -4,18 +4,24 @@ import 'package:get/get.dart';
 class NetworkService extends GetxService {
   var client = Dio(BaseOptions(baseUrl: 'https://ttt.bulbaman.me/'));
 
-  Rx<NewUser?> user = null.obs;
+  NewUser? user;
 
   Future<NetworkService> init() async {
+    await readPrefs();
     return this;
   }
+
+Future<void> readPrefs() async {
+  var userReaded = await storage.readUserData();
+}
 
   Future<bool> registration(String nick) async {
     try {
       var response = await client.post("user/add/$nick");
       var newUser = NewUser.fromJson(response.data);
+      user.value = newUser;
       print(newUser);
-      user = newUser;
+      await storage.writeUserData(newUser);
       return true;
     } catch (e) {
       print(e);
